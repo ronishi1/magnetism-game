@@ -11,31 +11,113 @@ var showUI = (show) => {
 
 showUI(false)
 
+var reset = (fullReset) => {
+  if (fullReset) {
+    [xCor, yCor] = [275, 0];
+  }
+  [xVel, yVel] = [0, 0];
+  ctx.clearRect(0, 0, 600, 600);
+  direction = "down"
+  circles = [];
+  showUI(false)
+}
 
-var particleSign,velocity,mField;
+var correctAnswer = (direction,field,charge) => {
+  if (charge == "positive"){
+    if (field == "in"){
+      switch(direction){
+        case "down":
+          return "right"
+          break;
+        case "up":
+          return "left"
+          break;
+        case "left":
+          return "down"
+          break;
+        default:
+          return "up"
+          break;
+      }
+    }
+    else {
+      switch(direction){
+        case "down":
+          return "left"
+          break;
+        case "up":
+          return "right"
+          break;
+        case "left":
+          return "up"
+          break;
+        default:
+          return "down"
+          break;
+      }
+    }
+  }
+  else {
+    if (field == "in"){
+      switch(direction){
+      case "down":
+        return "left"
+        break;
+      case "up":
+        return "right"
+        break;
+      case "left":
+        return "up"
+        break;
+      default:
+        return "down"
+        break;
+      }
+    }
+    else {
+      switch(direction){
+        case "down":
+          return "right"
+          break;
+        case "up":
+          return "left"
+          break;
+        case "left":
+          return "down"
+          break;
+        default:
+          return "up"
+          break;
+      }
+    }
+  }
+}
+var particleSign,velocity,mField,answer;
+
 
 var signs = ["positive","negative"];
-var directions = ["down"];
+var direction = "down"
 var fields = ["out","in"]
 var setup = function() {
   // initialize state of game here
   ctx.clearRect(0, 0, 600, 600);
-  var chosenSign = signs[Math.floor(Math.random() * signs.length)]
-  var chosenField = fields[Math.floor(Math.random() * fields.length)]
-  var chosenDirection = directions[Math.floor(Math.random() * directions.length)]
-  console.log(chosenSign, chosenDirection, chosenField)
-  createCanvas(chosenSign, chosenDirection, chosenField)
+  var chosenSign = signs[Math.floor(Math.random() * signs.length)];
+  var chosenField = fields[Math.floor(Math.random() * fields.length)];
+  var chosenDirection = direction
+  console.log(chosenSign, chosenDirection, chosenField);
+  answer = correctAnswer(chosenDirection,chosenField,chosenSign);
+  console.log(answer);
+  createCanvas(chosenSign, chosenDirection, chosenField);
 }
 
 var [xCor, yCor] = [275, 0];
 var [xVel, yVel] = [0, 0];
-var speed = 6;
+var speed = 5;
 var particle;
 var fieldlines;
 
 var createCanvas = function (sign, direction, field) {
   particle = new Image();   // Create new img element
-  console.log(direction)
   switch (direction) {
     case 'down':
       xVel = 0
@@ -66,7 +148,14 @@ var createCanvas = function (sign, direction, field) {
     particle.src = 'images/proton.png'; // Set source path
   }
   particle.onload = function(){
-    drawParticle(xCor, yCor + 200, false)
+    if (direction == 'down')
+      drawParticle(xCor, yCor + 275, false)
+    if (direction == 'up')
+      drawParticle(xCor, yCor - 275, false)
+    if (direction == 'left')
+      drawParticle(xCor - 275, yCor, false)
+    if (direction == 'right')
+      drawParticle(xCor + 275, yCor, false)
   }
 
   fieldlines = new Image();
@@ -87,27 +176,71 @@ var stopAnimation = (e) => {
 	}
 }
 
+var circles = []
 
-var drawParticle = (stopX, stopY, setupOnComplete) => {;
+var createCircle = (x, y) => {
+  ctx.beginPath();
+  ctx.arc(x+25, y+25, 10, 0, 2 * Math.PI);
+  ctx.stroke();
+}
+
+var drawCircle = false;
+var circleFrames = 1
+var drawParticle = (stopX, stopY, resetOnDone, dir) => {
 	ctx.clearRect(0, 0, 600, 600);
 	ctx.beginPath();
   ctx.drawImage(fieldlines,0,0);
 	ctx.drawImage(particle, xCor, yCor, 50, 50);
-
+  circles.forEach(circle => {
+    createCircle(circle.xCor, circle.yCor)
+  })
   var distance = (xCor - stopX) ** 2 + (yCor - stopY) ** 2
   // console.log(distance)
   if (distance < 10) {
     showUI(true);
+    if (resetOnDone) {
+      reset()
+      direction = dir;
+      if (direction == 'left') {
+        xCor = 550
+        yCor = 300
+      }
+      else if (direction == 'right') {
+        xCor = 0
+        yCor = 300
+      }
+      else if (direction == 'up') {
+        xCor = 275
+        yCor = 575
+      }
+      else if (direction == 'down') {
+        xCor = 300
+        yCor = 0
+      }
+      setup()
+    }
     stopAnimation();
-    if (setupOnComplete) setup()
-  } else {
+  }
+  else {
+    if (circleFrames % 10 == 0) {
+      circles.push({xCor, yCor})
+      //createCircle(xCor, yCor)
+    }
+    circleFrames++
+
     xCor += speed * xVel;
     yCor += speed * yVel;
-    id = window.requestAnimationFrame(() => {drawParticle(stopX, stopY)});
+    id = window.requestAnimationFrame(() => {drawParticle(stopX, stopY, resetOnDone, dir)});
   }
 }
 
 setup();
+
+var resetGame = () => {
+  alert('Your score was X. Press okay to restart game.')
+  reset();
+  setup();
+}
 
 // Controls
 var leftButton = document.getElementById('left')
@@ -119,26 +252,46 @@ leftButton.addEventListener ('click', () => {
   xVel = -1;
   yVel = 0;
   showUI(false);
-  drawParticle(xCor - 400, yCor, true)
+  if("left" == answer){
+    drawParticle(xCor - 300, yCor, true, 'left')
+  }
+  else {
+    resetGame(true)
+  }
 })
 
 rightButton.addEventListener ('click', () => {
   xVel = 1;
   yVel = 0;
   showUI(false);
-  drawParticle(xCor + 400, yCor, true)
+  if("right" == answer){
+    drawParticle(xCor + 300, yCor, true, 'right')
+  }
+  else {
+    resetGame(true)
+  }
 })
 
 upButton.addEventListener ('click', () => {
   xVel = 0;
   yVel = -1;
   showUI(false);
-  drawParticle(xCor, yCor - 400, true)
+  if("up" == answer){
+    drawParticle(xCor, yCor - 300, true, 'up')
+  }
+  else {
+    resetGame(true)
+  }
 })
 
 downButton.addEventListener ('click', () => {
   xVel = 0;
   yVel = 1;
   showUI(false);
-  drawParticle(xCor, yCor + 400, true)
+  if("down" == answer){
+    drawParticle(xCor, yCor + 300, true, 'down')
+  }
+  else {
+    resetGame(true)
+  }
 })
