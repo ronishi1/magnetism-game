@@ -180,8 +180,11 @@ var circles = []
 
 var createCircle = (x, y) => {
   ctx.beginPath();
-  ctx.arc(x+25, y+25, 10, 0, 2 * Math.PI);
+  ctx.arc(x+25, y+25, 6, 0, 2 * Math.PI);
+  // ctx.lineWidth = 0;
+  ctx.fillStyle = "#047c42";
   ctx.stroke();
+  ctx.fill();
 }
 
 var drawCircle = false;
@@ -295,3 +298,9 @@ downButton.addEventListener ('click', () => {
     resetGame(true)
   }
 })
+
+// document.body.onkeyup = function(e){
+//     if(e.keyCode == 32){
+//         stopAnimation()
+//     }
+// }
