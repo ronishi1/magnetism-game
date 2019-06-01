@@ -1,7 +1,18 @@
 c = document.getElementById("game");
 ctx = c.getContext("2d");
-var controls = document.getElementById('controls')
-var showUI = (show) => {
+let controls = document.getElementById('controls')
+let uiVisible = false;
+let lives = 3;
+let livesElement = document.getElementById('lives')
+let createLivesUI = () => {
+  let html = ''
+  for (let i = 0; i < lives; i++) {
+    html += '<i class="fa fa-heart"></i> '
+  }
+  livesElement.innerHTML = html;
+}
+let showUI = (show) => {
+  uiVisible = show;
   if (show) {
     controls.style.display = 'block'
   } else {
@@ -9,9 +20,36 @@ var showUI = (show) => {
   }
 }
 
+createLivesUI(lives);
+
+let subtractLife = () => {
+  if (lives > 1) {
+    lives--;
+    createLivesUI(lives);
+    moveMethods[answer]();
+  } else {
+    // GameOver
+    livesElement.innerHTML = '';
+    resetGame(true);
+  }
+}
 showUI(false)
 
-var reset = (fullReset) => {
+// ******************************************************
+// VARIABLE INIT
+let particleSign,velocity,mField,answer,particle,fieldlines;
+let signs = ["positive","negative"];
+let direction = "down"
+let fields = ["out","in"]
+let [xCor, yCor] = [275, 0];
+let [xVel, yVel] = [0, 0];
+let speed = 5;
+let id = -1;
+let circles = []
+
+// ******************************************************
+// SETUP/STARTING SECTION
+let reset = (fullReset) => {
   if (fullReset) {
     [xCor, yCor] = [275, 0];
   }
@@ -22,7 +60,41 @@ var reset = (fullReset) => {
   showUI(false)
 }
 
-var correctAnswer = (direction,field,charge) => {
+let setup = function() {
+  // initialize state of game here
+  ctx.clearRect(0, 0, 600, 600);
+  let chosenSign;
+  if (particleSign) {
+    chosenSign = particleSign;
+  } else {
+    chosenSign = signs[Math.floor(Math.random() * signs.length)];
+    particleSign = chosenSign;
+  }
+  let chosenField = fields[Math.floor(Math.random() * fields.length)];
+  let chosenDirection = direction
+  console.log(chosenSign, chosenDirection, chosenField);
+  answer = correctAnswer(chosenDirection,chosenField,chosenSign);
+  console.log(answer);
+  createCanvas(chosenSign, chosenDirection, chosenField);
+}
+
+let resetGame = (hardReset) => {
+  alert('Your score was X. Press okay to restart game.')
+  if (hardReset) {
+    lives = 3;
+    xCor = 275;
+    yCor = 0;
+    createLivesUI(lives);
+  }
+  reset();
+  setup();
+}
+
+// ******************************************************
+// GAME LOGIC FUNCTIONS
+
+// calculates correct answer for a given field/charge/direction
+let correctAnswer = (direction,field,charge) => {
   if (charge == "positive"){
     if (field == "in"){
       switch(direction){
@@ -92,31 +164,9 @@ var correctAnswer = (direction,field,charge) => {
     }
   }
 }
-var particleSign,velocity,mField,answer;
-
-
-var signs = ["positive","negative"];
-var direction = "down"
-var fields = ["out","in"]
-var setup = function() {
-  // initialize state of game here
-  ctx.clearRect(0, 0, 600, 600);
-  var chosenSign = signs[Math.floor(Math.random() * signs.length)];
-  var chosenField = fields[Math.floor(Math.random() * fields.length)];
-  var chosenDirection = direction
-  console.log(chosenSign, chosenDirection, chosenField);
-  answer = correctAnswer(chosenDirection,chosenField,chosenSign);
-  console.log(answer);
-  createCanvas(chosenSign, chosenDirection, chosenField);
-}
-
-var [xCor, yCor] = [275, 0];
-var [xVel, yVel] = [0, 0];
-var speed = 5;
-var particle;
-var fieldlines;
-
-var createCanvas = function (sign, direction, field) {
+// ******************************************************
+// DRAWING FUNCTIONS
+let createCanvas = function (sign, direction, field) {
   particle = new Image();   // Create new img element
   switch (direction) {
     case 'down':
@@ -167,18 +217,14 @@ var createCanvas = function (sign, direction, field) {
   }
 }
 
-var id = -1;
-
-var stopAnimation = (e) => {
+let stopAnimation = (e) => {
 	if (id > 0) {
 		window.cancelAnimationFrame(id);
 		id = -1;
 	}
 }
 
-var circles = []
-
-var createCircle = (x, y) => {
+let createCircle = (x, y) => {
   ctx.beginPath();
   ctx.arc(x+25, y+25, 6, 0, 2 * Math.PI);
   // ctx.lineWidth = 0;
@@ -187,9 +233,10 @@ var createCircle = (x, y) => {
   ctx.fill();
 }
 
-var drawCircle = false;
-var circleFrames = 1
-var drawParticle = (stopX, stopY, resetOnDone, dir) => {
+let drawCircle = false;
+let circleFrames = 1
+let drawParticle = (stopX, stopY, resetOnDone, dir) => {
+  // console.log(dir)
 	ctx.clearRect(0, 0, 600, 600);
 	ctx.beginPath();
   ctx.drawImage(fieldlines,0,0);
@@ -197,7 +244,7 @@ var drawParticle = (stopX, stopY, resetOnDone, dir) => {
   circles.forEach(circle => {
     createCircle(circle.xCor, circle.yCor)
   })
-  var distance = (xCor - stopX) ** 2 + (yCor - stopY) ** 2
+  let distance = (xCor - stopX) ** 2 + (yCor - stopY) ** 2
   // console.log(distance)
   if (distance < 10) {
     showUI(true);
@@ -236,71 +283,105 @@ var drawParticle = (stopX, stopY, resetOnDone, dir) => {
     id = window.requestAnimationFrame(() => {drawParticle(stopX, stopY, resetOnDone, dir)});
   }
 }
-
-setup();
-
-var resetGame = () => {
-  alert('Your score was X. Press okay to restart game.')
-  reset();
-  setup();
-}
-
-// Controls
-var leftButton = document.getElementById('left')
-var rightButton = document.getElementById('right')
-var upButton = document.getElementById('up')
-var downButton = document.getElementById('down')
-
-leftButton.addEventListener ('click', () => {
-  xVel = -1;
-  yVel = 0;
-  showUI(false);
-  if("left" == answer){
+// ******************************************************
+// KEYBINDS/EVENT LISETENERS
+let leftButton = document.getElementById('left')
+let rightButton = document.getElementById('right')
+let upButton = document.getElementById('up')
+let downButton = document.getElementById('down')
+let moveMethods = {
+  left: () => {
+    xVel = -1;
+    yVel = 0;
     drawParticle(xCor - 300, yCor, true, 'left')
-  }
-  else {
-    resetGame(true)
-  }
-})
-
-rightButton.addEventListener ('click', () => {
-  xVel = 1;
-  yVel = 0;
-  showUI(false);
-  if("right" == answer){
+  },
+  right: () => {
+    xVel = 1;
+    yVel = 0;
     drawParticle(xCor + 300, yCor, true, 'right')
-  }
-  else {
-    resetGame(true)
-  }
-})
-
-upButton.addEventListener ('click', () => {
-  xVel = 0;
-  yVel = -1;
-  showUI(false);
-  if("up" == answer){
+  },
+  up: () => {
+    xVel = 0;
+    yVel = -1;
     drawParticle(xCor, yCor - 300, true, 'up')
-  }
-  else {
-    resetGame(true)
-  }
-})
-
-downButton.addEventListener ('click', () => {
-  xVel = 0;
-  yVel = 1;
-  showUI(false);
-  if("down" == answer){
+  },
+  down: () => {
+    xVel = 0;
+    yVel = 1;
     drawParticle(xCor, yCor + 300, true, 'down')
   }
-  else {
-    resetGame(true)
+}
+var left = () => {
+  showUI(false);
+  if("left" == answer){
+    moveMethods.left();
   }
+  else {
+    subtractLife()
+  }
+}
+
+leftButton.addEventListener ('click', () => {
+  left();
 })
 
-// document.body.onkeyup = function(e){
-//     if(e.keyCode == 32){
-//         stopAnimation()
-//     }
-// }
+var right = () => {
+  showUI(false);
+  if("right" == answer){
+    moveMethods.right()
+  }
+  else {
+    subtractLife()
+  }
+}
+
+rightButton.addEventListener ('click', () => {
+  right();
+})
+
+var up = () => {
+  showUI(false);
+  if("up" == answer){
+    moveMethods.up();
+  }
+  else {
+    subtractLife()
+  }
+}
+
+upButton.addEventListener ('click', () => {
+  up();
+})
+
+var down = () => {
+  showUI(false);
+  if("down" == answer){
+    moveMethods.up();
+  }
+  else {
+    subtractLife()
+  }
+}
+
+downButton.addEventListener ('click', () => {
+  down();
+})
+
+// left = 37
+// up = 38
+// right = 39
+// down = 40
+document.body.onkeyup = function(e){
+    if (!uiVisible) return;
+    if(e.keyCode == 37){
+      left()
+    } else if (e.keyCode == 38) {
+      up()
+    } else if (e.keyCode == 39) {
+      right()
+    } else if (e.keyCode == 40) {
+      down();
+    }
+}
+
+setup();
