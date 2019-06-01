@@ -199,13 +199,13 @@ let createCanvas = function (sign, direction, field) {
   }
   particle.onload = function(){
     if (direction == 'down')
-      drawParticle(xCor, yCor + 275, false)
+      drawParticle(xCor, yCor + 250, false)
     if (direction == 'up')
-      drawParticle(xCor, yCor - 275, false)
+      drawParticle(xCor, yCor - 250, false)
     if (direction == 'left')
-      drawParticle(xCor - 275, yCor, false)
+      drawParticle(xCor - 250, yCor, false)
     if (direction == 'right')
-      drawParticle(xCor + 275, yCor, false)
+      drawParticle(xCor + 250, yCor, false)
   }
 
   fieldlines = new Image();
@@ -234,16 +234,17 @@ let createCircle = (x, y) => {
 }
 
 let drawCircle = false;
-let circleFrames = 1
+let circleFrames = 10
 let drawParticle = (stopX, stopY, resetOnDone, dir) => {
   // console.log(dir)
 	ctx.clearRect(0, 0, 600, 600);
 	ctx.beginPath();
   ctx.drawImage(fieldlines,0,0);
-	ctx.drawImage(particle, xCor, yCor, 50, 50);
   circles.forEach(circle => {
-    createCircle(circle.xCor, circle.yCor)
+    createCircle(circle.xCor + xVel * speed, circle.yCor + yVel * speed)
   })
+  ctx.drawImage(particle, xCor, yCor, 50, 50);
+  
   let distance = (xCor - stopX) ** 2 + (yCor - stopY) ** 2
   // console.log(distance)
   if (distance < 10) {
@@ -272,7 +273,7 @@ let drawParticle = (stopX, stopY, resetOnDone, dir) => {
     stopAnimation();
   }
   else {
-    if (circleFrames % 10 == 0) {
+    if (circleFrames % 10 == 0 && (distance > 50)) {
       circles.push({xCor, yCor})
       //createCircle(xCor, yCor)
     }

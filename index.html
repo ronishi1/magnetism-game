@@ -2,27 +2,34 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="index.css">
     <title>Magnetism Game</title>
   </head>
   <body>
-    <!-- <h1>Score: 21</h1>
-    <h1>Lives: <i class="fa fa-heart"></i> <i class="fa fa-heart"></i> <i class="fa fa-heart"></i></h1> -->
-    <h1>
-      Lives:
-      <span id="lives">
+    <div class="container">
+      <h1>
+      <span class="left">
+        Lives:
+        <span id="lives"></span>
       </span>
-    </h1>
-    <canvas width="600" height="600 " id="game"></canvas>
-    <br>
-    <div id="controls" style="font-size: 24px">
-      <button id="left"><i class="fa fa-arrow-left fa-3x"></i></button>
-      <button id="right"><i class="fa fa-arrow-right fa-3x"></i></button>
-      <button id="up"><i class="fa fa-arrow-up fa-3x"></i></button>
-      <button id="down"><i class="fa fa-arrow-down fa-3x"></i></button>
-    <!-- <button id="none"></button> -->
-    </div>
-
+      <span class="right">
+        Score:
+        <span id="score">23</span>
+      </span>
+      
+      <br>
+      </h1>
+      <canvas class="center" width="600" height="600 " id="game"></canvas>
+      <br>
+      <div id="controls" class="center" style="font-size: 24px">
+        <button id="left"><i class="fa fa-arrow-left fa-3x"></i></button>
+        <button id="right"><i class="fa fa-arrow-right fa-3x"></i></button>
+        <button id="up"><i class="fa fa-arrow-up fa-3x"></i></button>
+        <button id="down"><i class="fa fa-arrow-down fa-3x"></i></button>
+      <!-- <button id="none"></button> -->
+      </div>
+      </div>
   </body>
   <script src="game.js"></script>
 </html>

@@ -1,3 +1,22 @@
+* {
+	font-family: 'Josefin Sans', sans-serif;
+}
+
+.container {
+	width: 50%;
+	margin: 0 auto;
+}
+
+.center {
+	display: block;
+	margin: 0 auto;
+}
+
+h1 {
+	margin: 20px auto;
+	width: 600px;
+}
+
 #game{
  border: 1px solid black;
  font-size: 100px;
@@ -5,15 +24,23 @@
 
 #controls {
 	width: 600px;
-	margin-left: 30px;
+	margin: 0 auto;
 }
 
 button {
-	margin: auto;
-  	width: 100px;
-  	margin-right: 40px;
+	margin: 0;
+  	width: 16.6666667%;
+  	margin-left: 6%;
 }
 
 .fa-heart {
 	color: red;
+}
+
+.left {
+	float: left;
+}
+
+.right {
+	float: right;
 }
