@@ -4,6 +4,7 @@ let controls = document.getElementById('controls')
 let uiVisible = false;
 let lives = 3;
 let livesElement = document.getElementById('lives')
+
 let createLivesUI = () => {
   let html = ''
   for (let i = 0; i < lives; i++) {
@@ -27,6 +28,7 @@ let subtractLife = () => {
     lives--;
     createLivesUI(lives);
     moveMethods[answer]();
+    alert("You got it wrong, you now have " + lives + " lives")
   } else {
     // GameOver
     livesElement.innerHTML = '';
@@ -199,13 +201,13 @@ let createCanvas = function (sign, direction, field) {
   }
   particle.onload = function(){
     if (direction == 'down')
-      drawParticle(xCor, yCor + 250, false)
+      drawParticle(xCor, yCor + 150, false)
     if (direction == 'up')
-      drawParticle(xCor, yCor - 250, false)
+      drawParticle(xCor, yCor - 150, false)
     if (direction == 'left')
-      drawParticle(xCor - 250, yCor, false)
+      drawParticle(xCor - 150, yCor, false)
     if (direction == 'right')
-      drawParticle(xCor + 250, yCor, false)
+      drawParticle(xCor + 150, yCor, false)
   }
 
   fieldlines = new Image();
@@ -234,8 +236,9 @@ let createCircle = (x, y) => {
 }
 
 let drawCircle = false;
-let circleFrames = 10
-let drawParticle = (stopX, stopY, resetOnDone, dir) => {
+let circleFrames = 10;
+let currentPercentage = 0;
+let drawParticle = (stopX, stopY, resetOnDone, dir, curveDirection) => {
   // console.log(dir)
 	ctx.clearRect(0, 0, 600, 600);
 	ctx.beginPath();
@@ -243,8 +246,9 @@ let drawParticle = (stopX, stopY, resetOnDone, dir) => {
   circles.forEach(circle => {
     createCircle(circle.xCor + xVel * speed, circle.yCor + yVel * speed)
   })
+
   ctx.drawImage(particle, xCor, yCor, 50, 50);
-  
+
   let distance = (xCor - stopX) ** 2 + (yCor - stopY) ** 2
   // console.log(distance)
   if (distance < 10) {
@@ -279,9 +283,21 @@ let drawParticle = (stopX, stopY, resetOnDone, dir) => {
     }
     circleFrames++
 
-    xCor += speed * xVel;
-    yCor += speed * yVel;
-    id = window.requestAnimationFrame(() => {drawParticle(stopX, stopY, resetOnDone, dir)});
+
+    if (curveDirection) {
+      if (curveDirection == 'left' || curveDirection == 'right') {
+          xCor += speed * xVel * currentPercentage;
+          yCor += Math.abs(speed * xVel * (1 - currentPercentage));
+          if (currentPercentage < 1) {
+            currentPercentage += .02;
+          }
+      }
+    } else {
+      xCor += speed * xVel;
+      yCor += speed * yVel;
+    }
+
+    id = window.requestAnimationFrame(() => {drawParticle(stopX, stopY, resetOnDone, dir, curveDirection)});
   }
 }
 // ******************************************************
@@ -294,22 +310,22 @@ let moveMethods = {
   left: () => {
     xVel = -1;
     yVel = 0;
-    drawParticle(xCor - 300, yCor, true, 'left')
+    drawParticle(xCor - 300, yCor, true, 'left', 'left')
   },
   right: () => {
     xVel = 1;
     yVel = 0;
-    drawParticle(xCor + 300, yCor, true, 'right')
+    drawParticle(xCor + 300, yCor, true, 'right', 'right')
   },
   up: () => {
     xVel = 0;
     yVel = -1;
-    drawParticle(xCor, yCor - 300, true, 'up')
+    drawParticle(xCor, yCor - 300, true, 'up', 'up')
   },
   down: () => {
     xVel = 0;
     yVel = 1;
-    drawParticle(xCor, yCor + 300, true, 'down')
+    drawParticle(xCor, yCor + 300, true, 'down', 'down')
   }
 }
 var left = () => {
@@ -357,7 +373,7 @@ upButton.addEventListener ('click', () => {
 var down = () => {
   showUI(false);
   if("down" == answer){
-    moveMethods.up();
+    moveMethods.down();
   }
   else {
     subtractLife()
